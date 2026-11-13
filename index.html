@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>ZimGo Admin</title>
+<meta name="description" content="Manage places and driver reviews for ZimGo.">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0b8f4d">
+<meta name="color-scheme" content="light dark">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="ZimGo Admin">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/favicon-64.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.css">
+<style>
+:root{--bg:#f3f5f7;--sf:#ffffff;--sf2:#f8fafb;--tx:#101418;--mu:#6b7684;--ln:#e4e8ec;--ac:#0b8f4d;--ac2:#22c36e;--act:#ffffff;--acs:#e6f6ee;--rd:#d92d20;--bl:#1e6fe8;--or:#f08c00;--sh:0 1px 2px rgba(16,24,40,.06),0 8px 28px rgba(16,24,40,.08);--r:16px;--sab:env(safe-area-inset-bottom,0px);--sat:env(safe-area-inset-top,0px)}
+@media(prefers-color-scheme:dark){:root{--bg:#0b0e12;--sf:#141920;--sf2:#10151b;--tx:#eef1f5;--mu:#93a0b1;--ln:#232a34;--ac:#22c36e;--ac2:#4ddc92;--act:#03130a;--acs:#10281c;--sh:0 1px 2px rgba(0,0,0,.5),0 8px 28px rgba(0,0,0,.45)}}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overscroll-behavior:none}
+body{font:15px/1.45 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--tx);-webkit-font-smoothing:antialiased}
+button{font:inherit;cursor:pointer;border:0;color:inherit;background:none}
+a{color:inherit;text-decoration:none}
+input,select,textarea{font:inherit;font-size:16px;color:var(--tx);background:var(--sf2);border:1.5px solid var(--ln);border-radius:12px;padding:12px 14px;width:100%;outline:none;transition:border-color .15s,box-shadow .15s}
+input:focus,select:focus,textarea:focus{border-color:var(--ac);box-shadow:0 0 0 4px color-mix(in srgb,var(--ac) 18%,transparent)}
+.ic{flex:none;display:block}
+.hid{display:none!important}
+.m{color:var(--mu);font-size:13px}
+.btn{background:linear-gradient(135deg,var(--ac),var(--ac2));color:var(--act);font-weight:700;border-radius:12px;padding:12px 18px;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:transform .08s,filter .15s;box-shadow:0 4px 14px color-mix(in srgb,var(--ac) 35%,transparent)}
+.btn:active{transform:scale(.98)}.btn:hover{filter:brightness(1.05)}
+.btn.g{background:var(--sf);color:var(--tx);border:1.5px solid var(--ln);box-shadow:none}
+.btn.d{background:transparent;color:var(--rd);border:1.5px solid color-mix(in srgb,var(--rd) 55%,transparent);box-shadow:none}
+.btn.s{padding:8px 13px;font-size:13px;border-radius:10px}
+.btn.w{width:100%}
+.btn:disabled{opacity:.5;pointer-events:none}
+.ib{width:38px;height:38px;border-radius:11px;display:inline-flex;align-items:center;justify-content:center;color:var(--mu);transition:background .15s,color .15s}
+.ib:hover{background:var(--acs);color:var(--ac)}
+.card{background:var(--sf);border:1px solid var(--ln);border-radius:var(--r);padding:16px;box-shadow:var(--sh)}
+/* ---------- login ---------- */
+#login{min-height:100%;display:flex;align-items:center;justify-content:center;padding:22px;background:radial-gradient(1200px 600px at 10% -10%,color-mix(in srgb,var(--ac) 22%,transparent),transparent 60%),radial-gradient(900px 500px at 110% 110%,color-mix(in srgb,var(--ac2) 18%,transparent),transparent 60%),var(--bg)}
+.lc{background:var(--sf);border:1px solid var(--ln);border-radius:24px;padding:30px 26px;width:100%;max-width:400px;box-shadow:var(--sh);display:grid;gap:14px}
+.lg{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+.lgi{width:48px;height:48px;border-radius:15px;background:linear-gradient(135deg,var(--ac),var(--ac2));color:var(--act);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px color-mix(in srgb,var(--ac) 40%,transparent)}
+.lg b{font-size:21px;letter-spacing:-.4px;display:block;line-height:1.1}.lg small{color:var(--mu)}
+.fld{position:relative}.fld .ic{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--mu);pointer-events:none}.fld input{padding-left:42px}
+.err{color:var(--rd);font-size:13px;min-height:18px}
+/* ---------- app shell ---------- */
+#app{display:grid;grid-template-columns:252px 1fr;height:100dvh}
+.sb{display:flex;flex-direction:column;gap:6px;padding:18px 14px;background:var(--sf);border-right:1px solid var(--ln);padding-top:calc(18px + var(--sat))}
+.brand{display:flex;align-items:center;gap:11px;padding:4px 8px 16px}
+.brand .lgi{width:40px;height:40px;border-radius:12px}
+.brand b{font-size:17px;letter-spacing:-.3px;display:block;line-height:1.1}.brand small{color:var(--mu);font-size:12px}
+.sb nav{display:grid;gap:4px}
+.nv{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:12px;color:var(--mu);font-weight:600;position:relative;transition:background .15s,color .15s}
+.nv:hover{background:var(--sf2);color:var(--tx)}
+.nv.on{background:var(--acs);color:var(--ac)}
+.nv em{margin-left:auto;font-style:normal;background:var(--rd);color:#fff;border-radius:999px;font-size:11px;font-weight:700;padding:2px 8px}
+.sbf{margin-top:auto;display:grid;gap:10px}
+.acct{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--ln);border-radius:14px;background:var(--sf2)}
+.av{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--ac),var(--ac2));color:var(--act);font-weight:800;display:flex;align-items:center;justify-content:center;flex:none}
+.acct div:nth-child(2){flex:1;min-width:0}.acct b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:14px}.acct small{color:var(--mu);font-size:12px}
+main{display:flex;flex-direction:column;min-width:0;min-height:0}
+.tb{display:none}
+.view{flex:1;min-height:0;overflow:auto;display:none}
+.view.on{display:block}
+#v-places.on{display:grid}
+.pad{padding:26px;max-width:1100px;margin:0 auto;width:100%}
+#net{background:var(--rd);color:#fff;text-align:center;font-size:13px;font-weight:600;padding:6px}
+/* ---------- overview ---------- */
+.hello h1{font-size:26px;letter-spacing:-.6px}.hello p{color:var(--mu);margin-top:2px}
+.sg{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:22px 0}
+.sc{display:flex;flex-direction:column;gap:10px;position:relative;overflow:hidden}
+.sc .ico{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:var(--acs);color:var(--ac)}
+.sc.b .ico{background:color-mix(in srgb,var(--bl) 14%,transparent);color:var(--bl)}.sc.o .ico{background:color-mix(in srgb,var(--or) 16%,transparent);color:var(--or)}.sc.r .ico{background:color-mix(in srgb,var(--rd) 13%,transparent);color:var(--rd)}
+.sc b{font-size:30px;letter-spacing:-1px;line-height:1}.sc span{color:var(--mu);font-size:13px}
+.two{display:grid;grid-template-columns:1.2fr 1fr;gap:14px}
+.card h3{font-size:16px;margin-bottom:12px;letter-spacing:-.2px}
+.qa{display:grid;gap:10px}
+.qb{display:flex;align-items:center;gap:12px;padding:13px;border:1px solid var(--ln);border-radius:14px;background:var(--sf2);text-align:left;width:100%;font-weight:600;transition:border-color .15s,transform .08s}
+.qb:hover{border-color:var(--ac)}.qb:active{transform:scale(.99)}
+.qb .ico{width:38px;height:38px;border-radius:11px;background:var(--acs);color:var(--ac);display:flex;align-items:center;justify-content:center;flex:none}
+.qb small{display:block;color:var(--mu);font-weight:500}
+.ins{display:flex;align-items:center;gap:14px;margin-bottom:14px;background:linear-gradient(135deg,color-mix(in srgb,var(--ac) 12%,var(--sf)),var(--sf))}
+.ins .ico{width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,var(--ac),var(--ac2));color:var(--act);display:flex;align-items:center;justify-content:center;flex:none}
+.ins div:nth-child(2){flex:1}.ins b{display:block}
+/* ---------- places ---------- */
+.pv{grid-template-columns:420px 1fr;height:100%}
+.side{overflow:auto;padding:18px;border-right:1px solid var(--ln);background:var(--bg)}
+.mapbox{position:relative;min-height:240px}
+#map{position:absolute;inset:0}
+.xh{position:absolute;left:50%;top:50%;width:34px;height:34px;margin:-41px 0 0 -17px;pointer-events:none;z-index:5}
+.xh i{display:block;width:34px;height:34px;background:linear-gradient(135deg,#e5372c,#ff6a5c);border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 6px 16px rgba(0,0,0,.4)}
+.xh i:after{content:"";position:absolute;left:11px;top:11px;width:12px;height:12px;border-radius:50%;background:#fff}
+.xh u{position:absolute;left:50%;top:48px;width:14px;height:5px;margin-left:-7px;border-radius:50%;background:rgba(0,0,0,.35);filter:blur(1.5px)}
+.mt{position:absolute;right:12px;top:12px;z-index:6;display:grid;gap:8px}
+.mt button{background:var(--sf);border:1px solid var(--ln);border-radius:12px;padding:9px 12px;font-weight:600;box-shadow:var(--sh);display:flex;align-items:center;gap:7px;font-size:13px}
+.sj{position:absolute;left:12px;right:132px;top:12px;z-index:6;max-width:440px}
+.sj .fld input{box-shadow:var(--sh);background:var(--sf)}
+.sr{background:var(--sf);border-radius:14px;box-shadow:var(--sh);margin-top:8px;max-height:44vh;overflow:auto;border:1px solid var(--ln)}
+.sr div{padding:11px 14px;border-bottom:1px solid var(--ln);cursor:pointer}.sr div:last-child{border:0}.sr div:hover{background:var(--sf2)}.sr small{display:block;color:var(--mu)}
+.hd{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}.hd h2{font-size:20px;letter-spacing:-.4px}
+.rw{display:flex;gap:8px}
+.mini{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.mini div{background:var(--sf);border:1px solid var(--ln);border-radius:14px;padding:10px;text-align:center}.mini b{display:block;font-size:20px;letter-spacing:-.5px}.mini span{font-size:11px;color:var(--mu)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.chip{border:1.5px solid var(--ln);background:var(--sf);border-radius:999px;padding:6px 13px;font-size:13px;font-weight:600;color:var(--mu)}.chip.on{background:var(--tx);color:var(--bg);border-color:var(--tx)}
+.pl{display:flex;align-items:center;gap:12px;padding:11px;border-radius:14px;cursor:pointer;border:1px solid transparent;transition:background .12s}
+.pl:hover{background:var(--sf);border-color:var(--ln)}
+.pl .pi{width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex:none;background:color-mix(in srgb,var(--bl) 13%,transparent);color:var(--bl)}.pl .pi.u{background:color-mix(in srgb,var(--or) 15%,transparent);color:var(--or)}
+.pl div{min-width:0;flex:1}.pl b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pl small{color:var(--mu)}
+.f{display:grid;gap:10px}
+.f label{font-size:12px;color:var(--mu);font-weight:700;letter-spacing:.2px;text-transform:uppercase;margin-bottom:-4px}
+.tip{display:flex;gap:10px;align-items:flex-start;background:var(--acs);color:var(--ac);border-radius:12px;padding:11px 12px;font-size:13px;font-weight:600}
+/* ---------- drivers ---------- */
+.dv{display:flex;gap:14px;align-items:center;margin-bottom:12px}.dv img{width:52px;height:52px;border-radius:50%;object-fit:cover;background:var(--ln)}
+.dv>div{flex:1;min-width:0}.dv b{display:block}
+.empty{text-align:center;padding:44px 16px;color:var(--mu)}.empty .ico{width:60px;height:60px;border-radius:20px;background:var(--acs);color:var(--ac);display:inline-flex;align-items:center;justify-content:center;margin-bottom:12px}
+/* ---------- modal / toast ---------- */
+.mod{position:fixed;inset:0;background:rgba(5,8,12,.6);backdrop-filter:blur(4px);z-index:60;display:flex;align-items:flex-end;justify-content:center}
+.mod>div{background:var(--sf);width:100%;max-width:640px;max-height:92dvh;overflow:auto;border-radius:24px 24px 0 0;padding:22px;padding-bottom:calc(22px + var(--sab));box-shadow:var(--sh)}
+@media(min-width:700px){.mod{align-items:center}.mod>div{border-radius:24px}}
+.docs{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin:14px 0}
+.docs figure img{width:100%;border-radius:12px;border:1px solid var(--ln);cursor:zoom-in}.docs figcaption{font-size:12px;color:var(--mu);text-align:center;margin-top:3px}
+#toast{position:fixed;left:50%;bottom:calc(86px + var(--sab));transform:translateX(-50%) translateY(20px);background:var(--tx);color:var(--bg);padding:11px 18px;border-radius:14px;z-index:99;box-shadow:var(--sh);max-width:90vw;opacity:0;pointer-events:none;transition:all .25s;font-weight:600}
+#toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.bn{display:none}
+/* ---------- phone ---------- */
+@media(max-width:900px){
+ #app{grid-template-columns:1fr;grid-template-rows:1fr auto}
+ .sb{display:none}
+ .tb{display:flex;align-items:center;gap:10px;padding:10px 16px;padding-top:calc(10px + var(--sat));background:var(--sf);border-bottom:1px solid var(--ln)}
+ .tb .lgi{width:32px;height:32px;border-radius:10px}.tb b{flex:1;font-size:18px;letter-spacing:-.3px}
+ .bn{display:grid;grid-template-columns:repeat(3,1fr);background:var(--sf);border-top:1px solid var(--ln);padding:6px 6px calc(6px + var(--sab))}
+ .bn a{display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px;border-radius:14px;color:var(--mu);font-size:11px;font-weight:700;position:relative}
+ .bn a.on{color:var(--ac);background:var(--acs)}
+ .bn em{position:absolute;top:2px;right:calc(50% - 22px);font-style:normal;background:var(--rd);color:#fff;border-radius:999px;font-size:10px;font-weight:700;padding:1px 6px}
+ .pad{padding:16px}.hello h1{font-size:22px}
+ .sg{grid-template-columns:repeat(2,1fr);gap:10px}.two{grid-template-columns:1fr}
+ .pv{grid-template-columns:1fr;grid-template-rows:42% 1fr}.mapbox{order:-1;min-height:0}.side{border-right:0;border-top:1px solid var(--ln)}
+ .sj{right:12px}.mt{top:62px}
+}
+</style>
+</head>
+<body>
+
+<div id="login" class="hid">
+ <form class="lc" onsubmit="return signIn(event)">
+  <div class="lg"><div class="lgi"><i data-i="map-pin" data-s="26"></i></div><div><b>ZimGo Admin</b><small>Places &amp; driver reviews</small></div></div>
+  <div class="fld"><i data-i="user"></i><input id="em" type="text" placeholder="Username" autocomplete="username" autocapitalize="none" spellcheck="false" required></div>
+  <div class="fld"><i data-i="lock"></i><input id="pw" type="password" placeholder="Password" autocomplete="current-password" required></div>
+  <div class="err" id="lerr"></div>
+  <button class="btn w" id="lbtn" type="submit">Sign in</button>
+ </form>
+</div>
+
+<div id="app" class="hid">
+ <aside class="sb">
+  <div class="brand"><div class="lgi"><i data-i="map-pin" data-s="22"></i></div><div><b>ZimGo</b><small>Admin</small></div></div>
+  <nav>
+   <a class="nv on" data-v="overview" href="#overview"><i data-i="layout"></i><span>Overview</span></a>
+   <a class="nv" data-v="places" href="#places"><i data-i="map-pin"></i><span>Places</span></a>
+   <a class="nv" data-v="drivers" href="#drivers"><i data-i="user-check"></i><span>Drivers</span><em class="pb hid">0</em></a>
+  </nav>
+  <div class="sbf">
+   <button class="btn g w inst hid" onclick="installApp()"><i data-i="download"></i> Install app</button>
+   <div class="acct"><div class="av" id="av">A</div><div><b id="who">Admin</b><small>Administrator</small></div><button class="ib" onclick="auth.signOut()" title="Sign out"><i data-i="log-out"></i></button></div>
+  </div>
+ </aside>
+
+ <main>
+  <header class="tb"><div class="lgi"><i data-i="map-pin" data-s="18"></i></div><b id="ttl">Overview</b><button class="ib" onclick="auth.signOut()" title="Sign out"><i data-i="log-out"></i></button></header>
+  <div id="net" class="hid">You are offline. Changes will not save until you reconnect.</div>
+
+  <section id="v-overview" class="view on"><div class="pad">
+   <div class="hello"><h1 id="hi">Welcome</h1><p>Here is what is happening on ZimGo right now.</p></div>
+   <div class="sg">
+    <div class="card sc b"><div class="ico"><i data-i="map-pin"></i></div><b id="s-pl">0</b><span>Places on the map</span></div>
+    <div class="card sc"><div class="ico"><i data-i="shield"></i></div><b id="s-adm">0</b><span>Added by admin</span></div>
+    <div class="card sc r"><div class="ico"><i data-i="user-check"></i></div><b id="s-pd">0</b><span>Drivers waiting review</span></div>
+    <div class="card sc o"><div class="ico"><i data-i="activity"></i></div><b id="s-rd">–</b><span>Active rides</span></div>
+   </div>
+   <div class="card ins inst hid"><div class="ico"><i data-i="download" data-s="22"></i></div><div><b>Install ZimGo Admin</b><span class="m">Open it like an app, straight from your home screen.</span></div><button class="btn s" onclick="installApp()">Install</button></div>
+   <div class="two">
+    <div class="card"><h3>Recently added places</h3><div id="recent"></div></div>
+    <div class="card"><h3>Quick actions</h3><div class="qa">
+     <button class="qb" onclick="addPlace()"><span class="ico"><i data-i="plus"></i></span><span>Add a place<small>Pin it on the map for everyone</small></span></button>
+     <button class="qb" onclick="location.hash='#drivers'"><span class="ico"><i data-i="user-check"></i></span><span>Review drivers<small>Approve or reject new drivers</small></span></button>
+     <button class="qb" onclick="location.hash='#places';setTimeout(openImport,200)"><span class="ico"><i data-i="upload"></i></span><span>Import places<small>Paste many places at once</small></span></button>
+    </div></div>
+   </div>
+  </div></section>
+
+  <section id="v-places" class="view pv">
+   <div class="side" id="side"></div>
+   <div class="mapbox">
+    <div id="map"></div>
+    <div id="xh" class="xh hid"><i></i><u></u></div>
+    <div class="sj"><div class="fld"><i data-i="search"></i><input id="sq" placeholder="Search a place to jump the map there" autocomplete="off"></div><div id="sr" class="sr hid"></div></div>
+    <div class="mt"><button id="sat" onclick="toggleSat()"><i data-i="layers" data-s="18"></i><span>Satellite</span></button></div>
+   </div>
+  </section>
+
+  <section id="v-drivers" class="view"><div class="pad" id="drv"></div></section>
+ </main>
+
+ <nav class="bn">
+  <a data-v="overview" href="#overview"><i data-i="layout" data-s="22"></i>Overview</a>
+  <a data-v="places" href="#places"><i data-i="map-pin" data-s="22"></i>Places</a>
+  <a data-v="drivers" href="#drivers"><i data-i="user-check" data-s="22"></i>Drivers<em class="pb hid">0</em></a>
+ </nav>
+</div>
+<div id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<script>
+/* ===== icons (Lucide-style, stroke) ===== */
+const P={
+ 'map-pin':'<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>',
+ 'layout':'<rect width="7" height="9" x="3" y="3" rx="1.5"/><rect width="7" height="5" x="14" y="3" rx="1.5"/><rect width="7" height="9" x="14" y="12" rx="1.5"/><rect width="7" height="5" x="3" y="16" rx="1.5"/>',
+ 'user-check':'<path d="m16 11 2 2 4-4"/><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>',
+ 'user':'<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+ 'lock':'<rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+ 'plus':'<path d="M5 12h14"/><path d="M12 5v14"/>',
+ 'search':'<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+ 'x':'<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+ 'trash':'<path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
+ 'upload':'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/>',
+ 'download':'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/>',
+ 'layers':'<path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/>',
+ 'log-out':'<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/>',
+ 'check':'<path d="M20 6 9 17l-5-5"/>',
+ 'shield':'<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>',
+ 'activity':'<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
+ 'pencil':'<path d="M21.17 6.81a2.83 2.83 0 0 0-4-4L3.84 16.14a2 2 0 0 0-.5.83l-1.32 4.35a.5.5 0 0 0 .62.62l4.35-1.32a2 2 0 0 0 .83-.5Z"/><path d="m15 5 4 4"/>',
+ 'info':'<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',
+ 'share':'<path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="m16 6-4-4-4 4"/><path d="M12 2v13"/>'
+};
+const I=(n,s)=>`<svg class="ic" width="${s||20}" height="${s||20}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${P[n]||''}</svg>`;
+function hydrate(root){(root||document).querySelectorAll('i[data-i]').forEach(e=>{e.outerHTML=I(e.dataset.i,+e.dataset.s||20)})}
+hydrate();
+
+firebase.initializeApp({
+  apiKey:"AIzaSyCxHHRKO6D_-qVK1oqEQCKSCXkoAEuvJO4",
+  authDomain:"arndrive-423b1.firebaseapp.com",
+  databaseURL:"https://arndrive-423b1-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId:"arndrive-423b1",
+  storageBucket:"arndrive-423b1.firebasestorage.app",
+  messagingSenderId:"594530032327",
+  appId:"1:594530032327:web:2073fe4286a9ff6728bce2"
+});
+const auth=firebase.auth(),db=firebase.firestore(),$=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),3200)}
+const CATS=[['school','School'],['shop','Shop'],['health','Clinic / Hospital'],['food','Restaurant / Café'],['church','Church'],['transport','Bus stop / Rank'],['office','Office / Business'],['landmark','Landmark'],['other','Other']];
+const catName=c=>(CATS.find(x=>x[0]===c)||['','Place'])[1];
+const dist=(a,b)=>{const r=Math.PI/180,x=Math.sin((b.lat-a.lat)*r/2)**2+Math.cos(a.lat*r)*Math.cos(b.lat*r)*Math.sin((b.lng-a.lng)*r/2)**2;return 12742000*Math.asin(Math.sqrt(x))};
+
+let me=null,PL=[],PEND=0,unsubs=[],map=null,mode='idle',editId=null,sat=false,filt={q:'',cat:'',src:''},view='overview';
+
+/* ===== sign in ===== */
+async function signIn(e){e.preventDefault();$('#lerr').textContent='';const b=$('#lbtn');b.disabled=true;
+ try{const u=$('#em').value.trim(),email=u.includes('@')?u:u.toLowerCase()+'@zimgo-admin.app';await auth.signInWithEmailAndPassword(email,$('#pw').value)}
+ catch(x){$('#lerr').textContent=/password|credential|user-not-found|invalid/i.test(x.code+x.message)?'Wrong username or password.':'Could not sign in. Check your internet.'}
+ b.disabled=false;return false}
+auth.onAuthStateChanged(async u=>{
+ if(!u){me=null;stopSync();$('#app').classList.add('hid');$('#login').classList.remove('hid');return}
+ try{const d=await db.collection('users').doc(u.uid).get();
+  if(!d.exists||d.data().admin!==true){$('#lerr').textContent='This account does not have admin access.';await auth.signOut();return}
+  me={uid:u.uid,...d.data()}}
+ catch(e){$('#lerr').textContent='Could not verify admin access.';await auth.signOut();return}
+ $('#login').classList.add('hid');$('#app').classList.remove('hid');
+ const nm=me.name||'Admin';$('#who').textContent=nm;$('#av').textContent=nm.trim().charAt(0).toUpperCase()||'A';$('#hi').textContent='Welcome, '+nm.split(' ')[0];
+ startApp()});
+function stopSync(){unsubs.forEach(f=>{try{f()}catch(e){}});unsubs=[]}
+function startApp(){stopSync();renderSide();route();
+ unsubs.push(db.collection('places').limit(5000).onSnapshot(q=>{PL=q.docs.map(d=>({id:d.id,...d.data()}));stats();renderSide(true);drawDots()},()=>toast('Cannot read places. Publish the Firestore rules.')));
+ unsubs.push(db.collection('users').where('dstatus','==','pending').onSnapshot(q=>{PEND=q.size;$$('.pb').forEach(b=>{b.textContent=q.size;b.classList.toggle('hid',!q.size)});stats();if(view==='drivers'&&dfilter==='pending')loadDrivers()},()=>{}));
+ try{unsubs.push(db.collection('rides').where('active','==',true).onSnapshot(q=>{$('#s-rd').textContent=q.size},()=>{$('#s-rd').textContent='–'}))}catch(e){}}
+
+/* ===== router ===== */
+const TITLES={overview:'Overview',places:'Places',drivers:'Driver reviews'};
+function route(){const v=(location.hash||'#overview').slice(1);go(TITLES[v]?v:'overview')}
+addEventListener('hashchange',route);
+function go(v){view=v;$$('.view').forEach(s=>s.classList.toggle('on',s.id==='v-'+v));$$('[data-v]').forEach(a=>a.classList.toggle('on',a.dataset.v===v));$('#ttl').textContent=TITLES[v];
+ if(v==='places'){initMap();setTimeout(()=>map&&map.resize(),60)}if(v==='drivers')loadDrivers()}
+function addPlace(){location.hash='#places';setTimeout(()=>openEditor(),150)}
+
+/* ===== overview ===== */
+function stats(){const adm=PL.filter(p=>p.adm).length;$('#s-pl').textContent=PL.length;$('#s-adm').textContent=adm;$('#s-pd').textContent=PEND;
+ const R=PL.filter(p=>p.t).sort((a,b)=>b.t-a.t).slice(0,6);
+ $('#recent').innerHTML=R.length?R.map(p=>`<div class="pl" onclick="openFromOverview('${p.id}')"><span class="pi ${p.adm?'':'u'}">${I('map-pin',18)}</span><div><b>${esc(p.name)}</b><small>${esc(catName(p.cat))}${p.addr?' · '+esc(p.addr):''}</small></div></div>`).join(''):'<p class="m">No places yet. Add your first one.</p>'}
+function openFromOverview(id){location.hash='#places';setTimeout(()=>openEditor(id),200)}
+
+/* ===== map ===== */
+const GT=l=>[0,1,2,3].map(i=>`https://mt${i}.google.com/vt/lyrs=${l}&hl=en&gl=ZW&scale=${(devicePixelRatio||1)>=1.5?2:1}&x={x}&y={y}&z={z}`);
+const styleOf=l=>({version:8,glyphs:'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf',sources:{g:{type:'raster',tiles:GT(l),tileSize:256,maxzoom:20,attribution:'Map data © Google'}},layers:[{id:'g',type:'raster',source:'g',paint:{'raster-fade-duration':0}}]});
+function initMap(){if(map)return;
+ map=new maplibregl.Map({container:'map',style:styleOf('m'),center:[31.0522,-17.8292],zoom:11,attributionControl:{compact:true},fadeDuration:0,renderWorldCopies:false});
+ map.addControl(new maplibregl.NavigationControl({showCompass:false}),'bottom-right');
+ map.on('style.load',addLayers);
+ map.on('click','pl-c',e=>{if(mode==='idle'||mode==='edit'){const f=e.features&&e.features[0];if(f)openEditor(f.properties.id)}});
+ map.on('mouseenter','pl-c',()=>map.getCanvas().style.cursor='pointer');map.on('mouseleave','pl-c',()=>map.getCanvas().style.cursor='')}
+function fc(){return{type:'FeatureCollection',features:PL.filter(p=>p.lat!=null&&p.lng!=null).map(p=>({type:'Feature',geometry:{type:'Point',coordinates:[+p.lng,+p.lat]},properties:{id:p.id,name:p.name||'',adm:p.adm?1:0}}))}}
+function addLayers(){try{
+ if(!map.getSource('pl'))map.addSource('pl',{type:'geojson',data:fc()});
+ if(!map.getLayer('pl-c'))map.addLayer({id:'pl-c',type:'circle',source:'pl',paint:{'circle-radius':['interpolate',['linear'],['zoom'],10,3,16,8],'circle-color':['case',['==',['get','adm'],1],'#1e6fe8','#f08c00'],'circle-stroke-color':'#fff','circle-stroke-width':1.6}});
+ if(!map.getLayer('pl-t'))map.addLayer({id:'pl-t',type:'symbol',source:'pl',minzoom:14.5,layout:{'text-field':['get','name'],'text-font':['Open Sans Regular'],'text-size':12,'text-offset':[0,1],'text-anchor':'top','text-optional':true,'text-max-width':8},paint:{'text-color':'#111','text-halo-color':'#fff','text-halo-width':1.5}});
+ if(!map.getLayer('pl-sel'))map.addLayer({id:'pl-sel',type:'circle',source:'pl',filter:['==',['get','id'],editId||''],paint:{'circle-radius':13,'circle-color':'rgba(0,0,0,0)','circle-stroke-color':'#d92d20','circle-stroke-width':3}})}catch(e){}}
+function drawDots(){try{const s=map&&map.getSource('pl');s&&s.setData(fc())}catch(e){}}
+function toggleSat(){sat=!sat;$('#sat span').textContent=sat?'Map':'Satellite';map.setStyle(styleOf(sat?'y':'m'))}
+
+let sT=0;
+$('#sq').addEventListener('input',function(){clearTimeout(sT);const v=this.value.trim(),r=$('#sr');if(v.length<2){r.classList.add('hid');return}
+ sT=setTimeout(async()=>{const c=map.getCenter(),out=[],seen=new Set(),add=x=>{const k=x.name.toLowerCase()+x.lat.toFixed(3)+x.lng.toFixed(3);if(!seen.has(k)){seen.add(k);out.push(x)}};
+  PL.filter(p=>((p.name||'')+' '+(p.alias||'')).toLowerCase().includes(v.toLowerCase())).slice(0,4).forEach(p=>add({name:p.name,sub:'In ZimGo',lat:+p.lat,lng:+p.lng}));
+  const ws=await Promise.allSettled([
+   fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(v)}&limit=8&lat=${c.lat}&lon=${c.lng}`).then(r=>r.json()),
+   fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=8&countrycodes=zw&q=${encodeURIComponent(v)}`).then(r=>r.json())]);
+  if(ws[0].status==='fulfilled')(ws[0].value.features||[]).forEach(f=>{const p=f.properties,g=f.geometry.coordinates;if(g[1]<-15.4&&g[1]>-22.6&&g[0]>25.1&&g[0]<33.2&&(p.name||p.street))add({name:p.name||p.street,sub:[p.city||p.county,p.state].filter(Boolean).join(', ')||'Zimbabwe',lat:g[1],lng:g[0]})});
+  if(ws[1].status==='fulfilled')ws[1].value.forEach(x=>{const a=x.display_name.split(',');add({name:a[0],sub:a.slice(1,3).join(',').trim(),lat:+x.lat,lng:+x.lon})});
+  window._sr=out;r.innerHTML=out.length?out.slice(0,10).map((x,i)=>`<div onclick="jump(${i})">${esc(x.name)}<small>${esc(x.sub)}</small></div>`).join(''):'<div class="m">No results. Drag the map instead.</div>';r.classList.remove('hid')},350)});
+function jump(i){const x=(window._sr||[])[i];if(!x)return;map.flyTo({center:[x.lng,x.lat],zoom:18,duration:900});$('#sr').classList.add('hid');$('#sq').value=''}
+document.addEventListener('click',e=>{if(!e.target.closest('.sj'))$('#sr').classList.add('hid')});
+
+/* ===== places list + editor ===== */
+function setMode(m,id){mode=m;editId=id||null;$('#xh').classList.toggle('hid',m==='idle');try{map&&map.getLayer('pl-sel')&&map.setFilter('pl-sel',['==',['get','id'],editId||''])}catch(e){}}
+function filtered(){const q=filt.q.trim().toLowerCase();return PL.filter(p=>(!q||((p.name||'')+' '+(p.alias||'')+' '+(p.addr||'')).toLowerCase().includes(q))&&(!filt.cat||p.cat===filt.cat)&&(!filt.src||(filt.src==='adm'?p.adm:!p.adm))).sort((a,b)=>String(a.name).localeCompare(String(b.name)))}
+function renderSide(live){
+ if(mode!=='idle')return;
+ const L=filtered(),adm=PL.filter(p=>p.adm).length;
+ $('#side').innerHTML=`<div class="hd"><h2>Places</h2><div class="rw"><button class="ib" title="Import" onclick="openImport()">${I('upload')}</button><button class="ib" title="Export" onclick="exportCsv()">${I('download')}</button><button class="btn s" onclick="openEditor()">${I('plus',16)} Add place</button></div></div>
+ <div class="mini"><div><b>${PL.length}</b><span>Total</span></div><div><b>${adm}</b><span>Admin</span></div><div><b>${PL.length-adm}</b><span>Users</span></div></div>
+ <div class="tip">${I('info',18)}<span>Anything you add or change appears for every ZimGo user straight away, in search and on their map.</span></div>
+ <div class="fld" style="margin-top:14px">${I('search')}<input id="fq" placeholder="Search your places" value="${esc(filt.q)}"></div>
+ <div class="chips"><button class="chip ${!filt.src?'on':''}" onclick="setF('src','')">All</button><button class="chip ${filt.src==='adm'?'on':''}" onclick="setF('src','adm')">Admin</button><button class="chip ${filt.src==='usr'?'on':''}" onclick="setF('src','usr')">Users</button></div>
+ <select id="fc" style="margin-bottom:10px"><option value="">All categories</option>${CATS.map(c=>`<option value="${c[0]}" ${filt.cat===c[0]?'selected':''}>${c[1]}</option>`).join('')}</select>
+ <div id="plist">${listHtml(L)}</div>`;
+ $('#fq').oninput=function(){filt.q=this.value;$('#plist').innerHTML=listHtml(filtered())};$('#fc').onchange=function(){filt.cat=this.value;$('#plist').innerHTML=listHtml(filtered())}}
+function setF(k,v){filt[k]=v;renderSide()}
+function listHtml(L){return L.length?L.slice(0,300).map(p=>`<div class="pl" onclick="openEditor('${p.id}')"><span class="pi ${p.adm?'':'u'}">${I('map-pin',18)}</span><div><b>${esc(p.name)}</b><small>${esc(catName(p.cat))}${p.addr?' · '+esc(p.addr):''}${p.adm?'':' · added by a user'}</small></div></div>`).join('')+(L.length>300?`<p class="m" style="padding:8px">Showing 300 of ${L.length}. Use search to narrow down.</p>`:''):'<p class="m" style="padding:10px">No places found.</p>'}
+
+function openEditor(id){
+ initMap();const p=id?PL.find(x=>x.id===id):null;if(id&&!p){setMode('idle');return renderSide()}
+ setMode(p?'edit':'new',p?p.id:null);
+ const go2=()=>{if(p)map.flyTo({center:[+p.lng,+p.lat],zoom:Math.max(map.getZoom(),18),duration:700})};map.loaded()?go2():map.once('load',go2);
+ $('#side').innerHTML=`<div class="hd"><h2>${p?'Edit place':'Add place'}</h2><button class="ib" title="Close" onclick="closeEditor()">${I('x')}</button></div>
+ <div class="card f">
+  <div class="tip">${I('map-pin',18)}<span>Drag the map so the red pin sits exactly on the place, then save.</span></div>
+  <label>Place name</label><input id="pen" maxlength="80" placeholder="e.g. Shashi View Primary School" value="${p?esc(p.name):''}">
+  <label>Category</label><select id="pec">${CATS.map(c=>`<option value="${c[0]}" ${p&&p.cat===c[0]?'selected':''}>${c[1]}</option>`).join('')}</select>
+  <label>Also known as (extra search words)</label><input id="pea" maxlength="120" placeholder="e.g. Piki, Pikishop" value="${p?esc(p.alias||''):''}">
+  <label>Area / suburb (optional)</label><input id="pel" maxlength="80" placeholder="e.g. Mbare, Harare" value="${p?esc(p.addr||''):''}">
+  <button class="btn w" id="psv" onclick="savePlace()">${I('check',18)} ${p?'Save changes':'Add to map for everyone'}</button>
+  ${p?`<p class="m">Moved the pin? Pressing Save also updates the location.</p><button class="btn d w" onclick="delPlace()">${I('trash',18)} Delete this place</button>`:''}
+ </div>`;
+ $('#pen').focus()}
+function closeEditor(){setMode('idle');renderSide()}
+async function savePlace(){
+ const name=$('#pen').value.trim().replace(/\s+/g,' ');if(name.length<2)return toast('Type the place name.');
+ const c=map.getCenter(),lat=+c.lat.toFixed(6),lng=+c.lng.toFixed(6),cat=$('#pec').value,alias=$('#pea').value.trim().slice(0,120),addr=$('#pel').value.trim().slice(0,80),nl=name.toLowerCase();
+ const dup=PL.find(x=>x.id!==editId&&String(x.name||'').toLowerCase()===nl&&dist({lat,lng},{lat:+x.lat,lng:+x.lng})<150);
+ if(dup&&!confirm('A place called “'+dup.name+'” is already within 150 m. Add anyway?'))return;
+ const kw=[...new Set((nl+' '+alias.toLowerCase()).split(/\s+/).filter(w=>w.length>=2))].slice(0,30),b=$('#psv');b.disabled=true;
+ try{if(editId)await db.collection('places').doc(editId).update({name:name.slice(0,80),nl,kw,lat,lng,cat,alias,addr,adm:true,upd:Date.now(),updBy:me.uid});
+  else await db.collection('places').add({name:name.slice(0,80),nl,kw,lat,lng,cat,alias,addr,adm:true,by:me.uid,t:Date.now()});
+  toast(editId?'Saved. Updated for everyone.':'Added. Everyone can now find '+name);setMode('idle');renderSide()}
+ catch(e){b.disabled=false;toast(/permission/i.test(String(e.code||e.message))?'Not allowed. Publish the new Firestore rules.':'Could not save. Check your internet.')}}
+async function delPlace(){const p=PL.find(x=>x.id===editId);if(!p||!confirm('Delete “'+p.name+'” for everyone?'))return;
+ try{await db.collection('places').doc(p.id).delete();toast('Deleted.');setMode('idle');renderSide()}catch(e){toast('Could not delete.')}}
+
+/* ===== CSV ===== */
+function exportCsv(){const q=s=>'"'+String(s==null?'':s).replace(/"/g,'""')+'"',rows=[['name','lat','lng','category','alias','area'].join(',')].concat(PL.map(p=>[q(p.name),p.lat,p.lng,q(p.cat),q(p.alias),q(p.addr)].join(',')));
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([rows.join('\n')],{type:'text/csv'}));a.download='zimgo-places.csv';a.click()}
+function modal(html){const m=document.createElement('div');m.className='mod';m.innerHTML='<div>'+html+'</div>';m.onclick=e=>{if(e.target===m)m.remove()};document.body.appendChild(m);return m}
+function openImport(){modal(`<h2 style="margin-bottom:6px">Import places</h2><p class="m">One place per line: <b>name, latitude, longitude, category, alias, area</b>. Category and the rest are optional. Categories: ${CATS.map(c=>c[0]).join(', ')}.</p>
+ <textarea id="icsv" rows="9" style="margin:14px 0;font-family:ui-monospace,monospace;font-size:13px" placeholder="Shashi View Primary School, -17.8421, 31.0112, school, Shashi View, Mbare"></textarea>
+ <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><button class="btn g" onclick="this.closest('.mod').remove()">Cancel</button><button class="btn" id="ibtn" onclick="doImport()">Import</button></div>`)}
+function parseLine(l){const o=[];let c='',q=false;for(const ch of l){if(ch==='"')q=!q;else if(ch===','&&!q){o.push(c.trim());c=''}else c+=ch}o.push(c.trim());return o}
+async function doImport(){const lines=$('#icsv').value.split(/\r?\n/).map(l=>l.trim()).filter(Boolean),ok=[];
+ for(const l of lines){const a=parseLine(l),lat=parseFloat(a[1]),lng=parseFloat(a[2]);if(!a[0]||isNaN(lat)||isNaN(lng)||lat>-15||lat<-23||lng<25||lng>34)continue;
+  const cat=CATS.some(c=>c[0]===(a[3]||'').toLowerCase())?a[3].toLowerCase():'other',alias=(a[4]||'').slice(0,120),nl=a[0].toLowerCase();
+  ok.push({name:a[0].slice(0,80),nl,kw:[...new Set((nl+' '+alias.toLowerCase()).split(/\s+/).filter(w=>w.length>=2))].slice(0,30),lat:+lat.toFixed(6),lng:+lng.toFixed(6),cat,alias,addr:(a[5]||'').slice(0,80),adm:true,by:me.uid,t:Date.now()})}
+ if(!ok.length)return toast('No valid lines found.');const b=$('#ibtn');b.disabled=true;
+ try{for(let i=0;i<ok.length;i+=400){const bt=db.batch();ok.slice(i,i+400).forEach(x=>bt.set(db.collection('places').doc(),x));await bt.commit()}
+  toast('Imported '+ok.length+' places.');$('.mod')&&$('.mod').remove()}catch(e){b.disabled=false;toast('Import failed. Check the rules.')}}
+
+/* ===== drivers ===== */
+let dfilter='pending';
+async function loadDrivers(){const box=$('#drv'),chips=`<div class="chips">${['pending','verified','rejected'].map(s=>`<button class="chip ${dfilter===s?'on':''}" onclick="dfilter='${s}';loadDrivers()">${s[0].toUpperCase()+s.slice(1)}</button>`).join('')}</div>`;
+ box.innerHTML=`<div class="hd"><h2>Driver reviews</h2></div>${chips}<p class="m">Loading…</p>`;
+ try{const s=await db.collection('users').where('dstatus','==',dfilter).limit(100).get();
+  box.innerHTML=`<div class="hd"><h2>Driver reviews</h2></div>${chips}`+(s.empty?`<div class="empty"><div class="ico">${I('shield',28)}</div><p><b>${dfilter==='pending'?'All caught up':'Nothing here'}</b></p><p class="m">${dfilter==='pending'?'No drivers are waiting for review.':'No '+dfilter+' drivers.'}</p></div>`:s.docs.map(d=>{const u=d.data();return`<div class="card dv"><img src="${esc(u.photoS||u.photo||'')}" alt=""><div><b>${esc(u.name)}</b><span class="m">${esc(u.phone||'')} · ${esc(u.car||'')} · ${esc(u.plate||'')}</span></div><button class="btn s" onclick="reviewDriver('${d.id}')">${dfilter==='pending'?'Review':'Open'}</button></div>`}).join(''))}
+ catch(e){box.innerHTML+='<p class="m">Could not load. Check that your Firestore rules allow admin access.</p>'}}
+async function reviewDriver(uid){
+ const m=modal('<p class="m">Loading documents…</p>');m.id='dm';
+ try{const[us,ds]=await Promise.all([db.collection('users').doc(uid).get(),db.collection('users').doc(uid).collection('docs').get()]);const u=us.data(),docs={};ds.forEach(x=>docs[x.id]=x.data());const i=docs.info||{};
+  const names={licFront:'Licence (front)',licBack:'Licence (back)',vehicle:'Vehicle',registration:'Registration',insurance:'Insurance / disc',selfie:'Selfie'};
+  m.firstChild.innerHTML=`<h2>${esc(u.name)}</h2><p class="m" style="margin-top:4px">${esc(u.phone||'')}<br>Licence: <b>${esc(i.licNo||'')}</b> (expires ${esc(i.licExp||'')})<br>Vehicle: <b>${esc(((i.colour||'')+' '+(i.make||'')+' '+(i.model||'')+' '+(i.year||'')).trim())}</b> · ${esc(i.plate||'')}</p>
+  ${u.dnote?`<p class="m">Last note: ${esc(u.dnote)}</p>`:''}
+  <div class="docs">${u.photo?`<figure><img src="${u.photo}" onclick="window.open(this.src)"><figcaption>Profile photo</figcaption></figure>`:''}${Object.keys(names).filter(k=>docs[k]&&docs[k].img).map(k=>`<figure><img src="${docs[k].img}" onclick="window.open(this.src)"><figcaption>${names[k]}</figcaption></figure>`).join('')}</div>
+  <button class="btn w" onclick="decide('${uid}',true)">${I('check',18)} Approve driver</button>
+  <input id="rjn" placeholder="Reason if rejecting (shown to the driver)" style="margin-top:12px"><button class="btn d w" style="margin-top:10px" onclick="decide('${uid}',false)">Reject</button>
+  <button class="btn g w" style="margin-top:10px" onclick="document.getElementById('dm').remove()">Close</button>`}
+ catch(e){m.firstChild.innerHTML='<p class="m">Could not load documents.</p><button class="btn g w" style="margin-top:12px" onclick="document.getElementById(\'dm\').remove()">Close</button>'}}
+async function decide(uid,ok){const note=($('#rjn')&&$('#rjn').value.trim())||'';if(!ok&&!note)return toast('Add a short reason for the driver.');
+ try{await db.collection('users').doc(uid).update(ok?{dstatus:'verified',dnote:'',dreviewed:firebase.firestore.FieldValue.serverTimestamp()}:{dstatus:'rejected',dnote:note,dreviewed:firebase.firestore.FieldValue.serverTimestamp()});
+  const m=$('#dm');m&&m.remove();toast(ok?'Driver approved':'Driver rejected');loadDrivers()}catch(e){toast('Could not save. Check your admin permissions.')}}
+
+/* ===== installable app (PWA) ===== */
+let dip=null;const standalone=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone===true,isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
+function showInst(v){$$('.inst').forEach(e=>e.classList.toggle('hid',!v||standalone()))}
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();dip=e;showInst(true)});
+addEventListener('appinstalled',()=>{dip=null;showInst(false);toast('ZimGo Admin installed')});
+async function installApp(){if(dip){dip.prompt();try{await dip.userChoice}catch(e){}dip=null;showInst(false)}
+ else modal(`<h2 style="margin-bottom:8px">Install ZimGo Admin</h2><p class="m">${isIOS?`Tap the Share button ${I('share',16)} in Safari, then choose <b>Add to Home Screen</b>.`:'Open your browser menu and choose <b>Install app</b> or <b>Add to Home screen</b>.'}</p><button class="btn w" style="margin-top:16px" onclick="this.closest('.mod').remove()">Got it</button>`)}
+if(isIOS&&!standalone())showInst(true);
+function net(){$('#net').classList.toggle('hid',navigator.onLine)}addEventListener('online',net);addEventListener('offline',net);net();
+if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+</script>
+</body>
+</html>
